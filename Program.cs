@@ -2,6 +2,8 @@
 using Microsoft.EntityFrameworkCore;
 using NATKSchedule.Data;
 using NATKSchedule.Services;
+using NATKSchedule.Middlewares;
+
 
 namespace NATKSchedule
 {
@@ -23,7 +25,7 @@ namespace NATKSchedule
             builder.Services.AddDbContext<AppDbContext>(options =>
                 options.UseNpgsql(connectionString));
 
-            builder.Services.AddScoped<IScheduleService>, ScheduleService>();
+            builder.Services.AddScoped<IScheduleService, ScheduleService>();
 
             builder.Services.AddControllers();
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
@@ -31,6 +33,8 @@ namespace NATKSchedule
             builder.Services.AddSwaggerGen();
 
             var app = builder.Build();
+
+            app.UseMiddleware<ExceptionMiddleware>();
 
             // Configure the HTTP request pipeline.
             if (app.Environment.IsDevelopment())
