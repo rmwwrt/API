@@ -16,9 +16,12 @@ namespace NATKSchedule.Services
         public async Task<List<ScheduleByDateDto>> GetScheduleForGroup(string groupName, DateTime startDate, DateTime endDate)
         {
             ValidateDates(startDate, endDate);
+
             var group = await GetGroupByName(groupName);
+
             var schedules = await LoadSchedules(group.GroupId, startDate, endDate);
-            return BuildScheduleDto(schedules);
+
+            return BuildScheduleDto(startDate, endDate, schedules);
         }
 
         private static void ValidateDates(DateTime start, DateTime end)
@@ -107,6 +110,7 @@ namespace NATKSchedule.Services
                 .GroupBy(s => s.LessonDate)
                 .ToDictionary(g => g.Key, g => g.ToList());
         }
+
         private static ScheduleByDateDto BuildDayDto(List<Schedule> daySchedules)
         {
             var lessons = daySchedules
@@ -121,6 +125,7 @@ namespace NATKSchedule.Services
                 Lessons = lessons
             };
         }
+
         private static ScheduleByDateDto BuildEmptyDayDto(DateTime date)
         {
             return new ScheduleByDateDto
@@ -130,9 +135,21 @@ namespace NATKSchedule.Services
                 Lessons = new List<LessonDto>()
             };
         }
+
+        public async Task<List<GroupDto>> GetAllGroups()
+        {
+            return await _db.StudentGroups
+                .Include(g => g.Specialty)
+                .OrderBy(g => g.GroupName)
+                .Select(g => new GroupDto
+                {
+                    Id = g.GroupId,
+                    Name = g.GroupName,
+                    Course = g.Course,
+                    Specialty = g.Specialty.Name
+                })
+                .ToListAsync();
+        }
     }
-
-
-
 }
 

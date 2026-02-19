@@ -27,6 +27,12 @@ namespace NATKSchedule.Controllers
             return Ok(result);
         }
 
+        [HttpGet("/api/groups")]
+        public async Task<IActionResult> GetGroups()
+        {
+            var groups = await _service.GetAllGroups();
+            return Ok(groups);
+        }
 
     }
 }
